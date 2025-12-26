@@ -1,0 +1,56 @@
+# Server Port
+server:
+  port: 8080
+
+# Spring Application Name
+spring:
+  application:
+     name: asia-project-booklender
+
+# jpa
+  datasource:
+     url: ${SPRING_DATASOURCE_URL}
+     username: ${SPRING_DATASOURCE_USERNAME}
+     password: ${SPRING_DATASOURCE_PASSWORD}
+  jpa:
+     hibernate:
+        ddl-auto: ${SPRING_JPA_HIBERNATE_DDL_AUTO}
+     show-sql: true
+     properties:
+        hibernate:
+           format_sql: true
+           dialect: org.hibernate.dialect.PostgreSQLDialect
+     defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: always
+      continue-on-error: false
+
+# jwt - security
+jwt:
+  secret: ${JWT_SECRET:404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970}
+  expiration: ${JWT_EXPIRATION_INMILLIS:600000} # default 10 minutes
+
+# Borrowing Rules Configuration
+loan:
+  rules:
+    max-active-loans: 3
+    loan-duration-days: 14
+    enforce-overdue-restriction: true
+    low-inventory-threshold: 2
+
+# Spring Doc
+springdoc:
+  packages-to-scan : com.asia.booklender
+  paths-to-match: /api/**
+
+# Actuator
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  metrics:
+    enable:
+      all: true

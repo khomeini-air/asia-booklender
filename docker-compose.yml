@@ -1,0 +1,41 @@
+services:
+  asia-project:
+    build: .
+    container_name: asia-booklender
+    depends_on:
+      - db
+    environment:
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://asiadb:5432/asiadb
+      - SPRING_DATASOURCE_USERNAME=admin
+      - SPRING_DATASOURCE_PASSWORD=password
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - JWT_SECRET=Kk7y+9VXp2b5q8t/w3E6DcF1AhM4JkLmNoPqRsTuVxYz
+      - JWT_EXPIRATION_INMILLIS=900000 # 15 minutes
+    ports:
+      - "8080:8080"
+    networks:
+      - asia-network
+    restart: always
+
+  db:
+    image: postgres:15-alpine
+    container_name: asiadb
+    hostname: asiadb
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: asiadb
+    ports:
+        - "5432:5432"
+    networks:
+      - asia-network
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    restart: always
+
+volumes:
+  postgres_data:
+
+networks:
+  asia-network:
+    driver: bridge
