@@ -55,57 +55,57 @@ A secure RESTful API for managing a book lending system with configurable borrow
                                       │
                                       ▼
                     ┌──────────────────────────────────┐
-                    │     Spring Security Filter Chain │
-                    │                                  │
-                    │  - RequestLoggingFilter          │
-                    │    (traceId, request logging)    │
-                    │  - JwtAuthFilter                 │
-                    │    (JWT validation, auth)        │
+                    │     Spring Security Filter Chain    │
+                    │                                     │   
+                    │  - RequestLoggingFilter             │
+                    │    (traceId, request logging)       │
+                    │  - JwtAuthFilter                    │
+                    │    (JWT validation, auth)           │
                     └─────────────┬────────────────────┘
                                   │
                                   ▼
-┌──────────────────────────────────────────────────────────────────────┐
-│                        Package-by-Feature Layer                       │
-│                                                                      │
-│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐             │
-│  │   auth        │   │   book         │   │   loan        │             │
-│  │──────────────│   │──────────────│   │──────────────│             │
-│  │ api          │   │ api          │   │ api          │             │
-│  │ dto          │   │ dto          │   │ dto          │             │
-│  │ service      │   │ service      │   │ service      │             │
-│  │ security     │   │ repository   │   │ repository   │             │
-│  │ util         │   │ mapper       │   │ mapper       │             │
-│  └──────────────┘   └──────────────┘   └──────────────┘             │
-│                                                                      │
-│  ┌──────────────┐                                                   │
+┌───────────────────────────────────────────────────────────────┐
+│                        Package-by-Feature Layer                     │
+│                                                                     │
+│  ┌──────────────┐   ┌──────────────┐   ┌──────────────┐         │
+│  │   auth        │   │   book         │   │   loan        │         │
+│  │──────────────│   │──────────────│   │──────────────│         │
+│  │ api           │   │ api            │   │ api           │         │
+│  │ dto           │   │ dto            │   │ dto           │         │
+│  │ service       │   │ service        │   │ service       │         │
+│  │ security      │   │ repository     │   │ repository    │         │
+│  │ util          │   │ mapper         │   │ mapper        │         │
+│  └──────────────┘   └──────────────┘    └──────────────┘        │
+│                                                                     │
+│  ┌─────────────┐                                                   │
 │  │  member      │                                                   │
-│  │──────────────│                                                   │
+│  │─────────────│                                                   │
 │  │ api          │                                                   │
 │  │ dto          │                                                   │
 │  │ service      │                                                   │
 │  │ repository   │                                                   │
 │  │ domain       │                                                   │
-│  └──────────────┘                                                   │
+│  └─────────────┘                                                   │
 │                                                                     │
-│  ┌──────────────────────────────────────────────────────────────┐  │
-│  │                        shared                                 │  │
-│  │--------------------------------------------------------------│  │
-│  │ api (ApiResponse, Pagination)                                │  │
-│  │ exception (GlobalExceptionHandler)                            │  │
-│  │ observability (logging, filters)                              │  │
-│  │ security (SecurityUtil, CurrentUser)                          │  │
-│  └──────────────────────────────────────────────────────────────┘  │
-└──────────────────────────────────────────────────────────────────────┘
+│  ┌─────────────────────────────────────────────────────┐       │
+│  │                        shared                            │       │
+│  │----------------------------------------------------------│       │
+│  │ api (ApiResponse, Pagination)                            │       │
+│  │ exception (GlobalExceptionHandler)                       │       │
+│  │ observability (logging, filters)                         │       │
+│  │ security (SecurityUtil, CurrentUser)                     │       │    
+│  └─────────────────────────────────────────────────────┘       │
+└───────────────────────────────────────────────────────────────┘
                                   │
                                   ▼
                     ┌──────────────────────────────────┐
-                    │        Repository Layer           │
-                    │      (Spring Data JPA)            │
-                    └─────────────┬────────────────────┘
+                    │        Repository Layer             │
+                    │      (Spring Data JPA)              │
+                    └────────────┬────────────────────┘
                                   │
                                   ▼
                     ┌──────────────────────────────────┐
-                    │        PostgreSQL Database        │
+                    │        PostgreSQL Database          │
                     └──────────────────────────────────┘
 
 ```
