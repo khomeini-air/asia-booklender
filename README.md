@@ -8,24 +8,25 @@ A secure RESTful API for managing a book lending system with configurable borrow
 
 - Authentication & Authorization: JWT token-based authentication and role-based access control (ADMIN, MEMBER).
 - APIs for Member, Book, and Loan management/features with consistent error response format.
+- Member API will only cover the get all (`/members`) for Admin,  and get me (`/members/me`). The rest will have similar pattern with Book and Loan API.
 - Configurable business rule: Maximum active loans (default: 3), overdue loans enforcement (default: true), and due days (default: 14 days).
 - Adaptive hybrid locking for concurrent borrow operations to ensure Data Consistency.
 - Rational database with PostgreSQL.
 - Containerization with Docker and Docker Compose setup.
-- Monitoring and Observability with Spring Actuator, Prometheus, and comprehensive logging with tracingId accross services.
+- Monitoring and Observability with Spring Actuator, Prometheus, and comprehensive logging with tracingId across services.
 - API Documentation with OpenAPI 3.0 and Swagger UI.
-- Data Initialization: Idempotent seed data with SQL scripts for Users, Members and Books.
+- Data Initialization with idempotent seed data scripts for Members and Books.
 - System is capable of handling medium throughput of high-demand books, 1000 users for one book.
 - System latency is medium.
 
 
 ### Out of Scope
-- User Registration, Logout, Password Reset, and refresh token.
+- Unit Tests, Integration Tests, Performance Tests, Security Tests. Implementing those tests will require huge amount of dedications that only worth, in my opinion, if the candidate got shortlisted 
+- User registration, logout, password reset, and refresh token.
 - Support for multiple book loan
-- Full-Text Search for book and loan history.
+- Full-Text Search for members, books and loans history.
 - Book wishlist, book tags, and book reservations
 - Reviews and Ratings
-- Unit Tests, Integration Tests, Performance Tests, Security Tests.
 - CI/CD and Production readiness
 - Horizontal Scalability with load balancing, multiple instances and database sharding/read replica.
 - Caching for frequently accessed data (popular books)
@@ -41,8 +42,7 @@ A secure RESTful API for managing a book lending system with configurable borrow
 - Gradle
 - Docker & Docker Compose
 - Swagger/OpenAPI 3.0
-- Spring Actuator
-- Prometheus
+- Spring Actuator with Micrometer and Prometheus
 
 ## Architecture & Design
 
@@ -142,15 +142,6 @@ A secure RESTful API for managing a book lending system with configurable borrow
 
 To view the complete API documentation with request/response examples, visit: **Swagger UI**: http://localhost:8080/swagger-ui.html (Interactive documentation)
 
-The Swagger UI provides:
-- ✅ Complete endpoint documentation
-- ✅ Request/response schemas
-- ✅ Try-it-out functionality
-- ✅ Authentication testing
-- ✅ Model definitions
-
-**Note**: For production deployments, please refer to Swagger UI for the most up-to-date API specification as it's generated from the code.
-
 ## Getting Started
 
 ### Prerequisites
@@ -188,12 +179,12 @@ The API uses JWT (JSON Web Token) based authentication. Users must login first t
 
 ### Available Users:
 
-| Email                     | Password | Role | Linked Member |
-|---------------------------|----------|------|---------------|
-| admin@booklender.com      | admin123 | ADMIN | N/A (can access all) |
-| donald.trump@usa.com      | alice123 | MEMBER | Alice Johnson (ID: 1) |
-| barack.obama@usa.com      | bob123 | MEMBER | Bob Smith (ID: 2) |
-| charlie.brown@example.com | charlie123 | MEMBER | Charlie Brown (ID: 3) |
+| Email                | Password  | Role | Linked Member |
+|----------------------|-----------|------|---------------|
+| admin@booklender.com | admin123  | ADMIN | N/A (can access all) |
+| donald.trump@usa.com | donald123 | MEMBER | Alice Johnson (ID: 1) |
+| barack.obama@usa.com | barack123 | MEMBER | Bob Smith (ID: 2) |
+| john.rambo@usa.com   | john123   | MEMBER | Charlie Brown (ID: 3) |
 
 ### Authentication Flow:
 
@@ -383,7 +374,7 @@ Donald returns the book
 ```bash
 curl -X POST 'localhost:8080/api/loans/return/6' -H 'Authorization: Bearer eyJhbGciOiJIUzI1Ni..' 
 
-# Alice cannot return Bob's loan - authorization check prevents this
+# Donald cannot return Obama's loan - authorization check prevents this
 # Returns: 403 Forbidden - "You can only return your own loans"
 ```
 
@@ -434,16 +425,16 @@ Note that Donald can not return Obama's loan, getting the following failed respo
 
 ### Spring Actuator
 
-The application includes Spring Boot Actuator for operational monitoring and management.
+The application includes Spring Boot Actuator for operational monitoring and management. All of them require admin role.
 
 **Available Endpoints:**
 
-| Endpoint | Description | Access |
-|----------|-------------|--------|
-| `/actuator/health` | Application health status | Public |
-| `/actuator/info` | Application information | Public |
-| `/actuator/metrics` | Application metrics | Requires AUTH |
-| `/actuator/prometheus` | Prometheus-formatted metrics | Requires AUTH |
+| Endpoint | Description | Access     |
+|----------|-------------|------------|
+| `/actuator/health` | Application health status | Admin only |
+| `/actuator/info` | Application information | Admin only |
+| `/actuator/metrics` | Application metrics | Admin only |
+| `/actuator/prometheus` | Prometheus-formatted metrics | Admin only |
 
 
 ## Stopping the Application

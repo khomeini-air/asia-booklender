@@ -33,6 +33,5 @@ public class Book extends BasedEntity {
     private Integer availableCopies;
 
     @Version
-    @Column(nullable = false, columnDefinition = "DEFAULT 0")
-    private Integer version;
+    private Integer version = 0;
 }
