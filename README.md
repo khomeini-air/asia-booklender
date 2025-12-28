@@ -7,13 +7,13 @@ A secure RESTful API for managing a book lending system with configurable borrow
 ### In Scope
 
 - Authentication & Authorization: JWT token-based authentication and role-based access control (ADMIN, MEMBER).
-- APIs for Member, Book, and Loan management/features with consistent error response format.
-- Member API will only cover the get all (`/members`) for Admin,  and get me (`/members/me`). The rest will have similar pattern with Book and Loan API.
+- APIs for Member, Book, and Loan management/features with consistent response format.
+- Member API will only cover the get all (`/members`) for Admin,  and get me (`/members/me`) for all users. The remaining operations will have similar pattern with Book and Loan API.
 - Configurable business rule: Maximum active loans (default: 3), overdue loans enforcement (default: true), and due days (default: 14 days).
 - Adaptive hybrid locking for concurrent borrow operations to ensure Data Consistency.
 - Rational database with PostgreSQL.
 - Containerization with Docker and Docker Compose setup.
-- Monitoring and Observability with Spring Actuator, Prometheus, and comprehensive logging with tracingId across services.
+- Monitoring and Observability with Spring Actuator integrated with Micrometer and Prometheus, and comprehensive logging with tracingId across services.
 - API Documentation with OpenAPI 3.0 and Swagger UI.
 - Data Initialization with idempotent seed data scripts for Members and Books.
 - System is capable of handling medium throughput of high-demand books, 1000 users for one book.
@@ -22,7 +22,7 @@ A secure RESTful API for managing a book lending system with configurable borrow
 
 ### Out of Scope
 - Unit Tests, Integration Tests, Performance Tests, Security Tests. Implementing those tests will require huge amount of dedications that only worth, in my opinion, if the candidate got shortlisted 
-- User registration, logout, password reset, and refresh token.
+- User and Member registration, logout, password reset, and refresh token.
 - Support for multiple book loan
 - Full-Text Search for members, books and loans history.
 - Book wishlist, book tags, and book reservations
@@ -74,7 +74,7 @@ A secure RESTful API for managing a book lending system with configurable borrow
 │  │ dto           │   │ dto            │   │ dto           │         │
 │  │ service       │   │ service        │   │ service       │         │
 │  │ security      │   │ repository     │   │ repository    │         │
-│  │ util          │   │ mapper         │   │ mapper        │         │
+│  │ filter        │   │ mapper         │   │ mapper        │         │
 │  └──────────────┘   └──────────────┘    └──────────────┘        │
 │                                                                     │
 │  ┌─────────────┐                                                   │
@@ -84,7 +84,7 @@ A secure RESTful API for managing a book lending system with configurable borrow
 │  │ dto          │                                                   │
 │  │ service      │                                                   │
 │  │ repository   │                                                   │
-│  │ domain       │                                                   │
+│  │ mapper       │                                                   │
 │  └─────────────┘                                                   │
 │                                                                     │
 │  ┌─────────────────────────────────────────────────────┐       │
@@ -92,7 +92,7 @@ A secure RESTful API for managing a book lending system with configurable borrow
 │  │----------------------------------------------------------│       │
 │  │ api (ApiResponse, Pagination)                            │       │
 │  │ exception (GlobalExceptionHandler)                       │       │
-│  │ observability (logging, filters)                         │       │
+│  │ observability (logging)                                  │       │
 │  │ security (SecurityUtil, CurrentUser)                     │       │    
 │  └─────────────────────────────────────────────────────┘       │
 └───────────────────────────────────────────────────────────────┘
@@ -111,7 +111,7 @@ A secure RESTful API for managing a book lending system with configurable borrow
 ```
 
 
-### Key Design Decisions
+### Key Design
 
 1. **Adaptive Hybrid Locking**: Use optimistic locking for high inventory, pessimistic for low inventory. Result in better throughput for abundant books and Guaranteed consistency for scarce books
 2. **JWT Token Authentication**: Stateless JWT tokens for better scalability, distributed-friendly, and mobile-friendly.
@@ -123,18 +123,23 @@ A secure RESTful API for managing a book lending system with configurable borrow
 ### Data Model
 
 ```
-┌─────────────┐         ┌─────────────┐         ┌─────────────┐
-│    Book     │         │    Loan     │         │   Member    │
-├─────────────┤         ├─────────────┤         ├─────────────┤
-│ id (PK)     │────┐    │ id (PK)     │    ┌────│ id (PK)     │
-│ title       │    │    │ bookId (FK) │────┘    │ name        │
-│ author      │    └────│ memberId(FK)│         │ email (UK)  │
-│ isbn (UK)   │         │ borrowedAt  │         └─────────────┘
-│ totalCopies │         │ dueDate     │
-│ availableC. │         │ returnedAt  │
+┌────────────┐         ┌─────────────┐         ┌─────────────┐
+│    Book     │         │    Loan      │          │   Member     │
+├────────────┤         ├─────────────┤         ├─────────────┤
+│ id (PK)     │───┐     │ id (PK)      │    ┌────│ id (PK)      │
+│ title       │   │     │ bookId (FK)  │────┘    │ name         │
+│ author      │   └────│ memberId(FK)  │         │ email (UK)   │
+│ isbn (UK)   │         │ borarowedAt  │         └─────────────┘
+│ totalCopies │         │ dueAt        │   
+│ availableC. │         │ returnedAt   │ 
 │ version     │         └─────────────┘
-└─────────────┘
+└────────────┘
 ```
+Apart from the core attributes above, each entity by default also have the following:
+1. created_by
+2. updated_by
+3. created_at
+4. updated_at
 
 ### API Documentation
 
