@@ -113,10 +113,10 @@ A secure RESTful API for managing a book lending system with configurable borrow
 
 ### Key Design
 
-1. **Adaptive Hybrid Locking**: Use optimistic locking for high inventory, pessimistic for low inventory. Result in better throughput for abundant books and Guaranteed consistency for scarce books
-2. **JWT Token Authentication**: Stateless JWT tokens for better scalability, distributed-friendly, and mobile-friendly.
-3. **Member ID from JWT Token**: More secure as it prevents users from impersonating others, cleaner API, and ensuring resource ownership implicit in the authentication.
-4. **Package-by-Feature**: Enforce feature isolation, allow each to evolve independently and easily convert them into microservices later.
+1. **Package-by-Feature**: Enforce feature isolation, allow each to evolve independently and easily convert them into microservices later.
+2. **Adaptive Hybrid Locking**: Use optimistic locking for high inventory, pessimistic for low inventory. Result in better throughput for abundant books and Guaranteed consistency for scarce books.
+3. **JWT Token Authentication**: Stateless JWT tokens for better scalability, distributed-friendly, and mobile-friendly.
+4. **Member email from JWT Token**: More secure as it prevents users from impersonating others, cleaner API, and ensuring resource ownership implicit in the authentication.
 5. **Global Exception Handling**: Clean controller code, consistent error response.
 
 
@@ -141,12 +141,6 @@ Apart from the core attributes above, each entity by default also have the follo
 3. created_at
 4. updated_at
 
-### API Documentation
-
-**All API endpoints are documented using OpenAPI 3.0 specification.**
-
-To view the complete API documentation with request/response examples, visit: **Swagger UI**: http://localhost:8080/swagger-ui.html (Interactive documentation)
-
 ## Getting Started
 
 ### Prerequisites
@@ -168,14 +162,14 @@ The API will be available at `http://localhost:8080`
 
 After starting the application, you can access:
 
-| Endpoint | Purpose | Authentication |
-|----------|---------|----------------|
-| http://localhost:8080/swagger-ui.html | Interactive API Documentation | None (public)  |
-| http://localhost:8080/api-docs | OpenAPI Specification (JSON) | None (public)  |
-| http://localhost:8080/actuator/health | Health Check | Admin only     |
-| http://localhost:8080/actuator/info | Application Info | Admin only     |
-| http://localhost:8080/actuator/metrics | Metrics | Admin only     |
-| http://localhost:8080/actuator/prometheus | Prometheus Metrics | Admin only     |
+| Endpoint                                    | Purpose | Authentication |
+|---------------------------------------------|---------|----------------|
+| http://localhost:8080/swagger-ui/index.html | Interactive API Documentation | None (public)  |
+| http://localhost:8080/api-docs              | OpenAPI Specification (JSON) | None (public)  |
+| http://localhost:8080/actuator/health       | Health Check | Admin only     |
+| http://localhost:8080/actuator/info         | Application Info | Admin only     |
+| http://localhost:8080/actuator/metrics      | Metrics | Admin only     |
+| http://localhost:8080/actuator/prometheus   | Prometheus Metrics | Admin only     |
 
 
 ## Authentication & Authorization
@@ -186,10 +180,10 @@ The API uses JWT (JSON Web Token) based authentication. Users must login first t
 
 | Email                | Password  | Role | Linked Member |
 |----------------------|-----------|------|---------------|
-| admin@booklender.com | admin123  | ADMIN | N/A (can access all) |
-| donald.trump@usa.com | donald123 | MEMBER | Alice Johnson (ID: 1) |
-| barack.obama@usa.com | barack123 | MEMBER | Bob Smith (ID: 2) |
-| john.rambo@usa.com   | john123   | MEMBER | Charlie Brown (ID: 3) |
+| admin@booklender.com | admin123  | ADMIN | Admin         |
+| donald.trump@usa.com | donald123 | MEMBER | Donald Trump  |
+| barack.obama@usa.com | barack123 | MEMBER | Barack Obama  |
+| john.rambo@usa.com   | john123   | MEMBER | John Rambo    |
 
 ### Authentication Flow:
 
@@ -227,9 +221,9 @@ curl http://localhost:8080/api/members/me \
 ```
 
 ### Token Details:
-- **Expiration**: configurable, default 10 minutes
-- **Type**: Bearer token
-- **Algorithm**: HMAC SHA-256
+- Expiration: configurable, default 10 minutes
+- Type: Bearer token
+- Algorithm: HMAC SHA-256
 
 ## API Endpoints
 
@@ -245,16 +239,16 @@ Below is a summary of available endpoints. For complete details, refer to Swagge
 
 ### Books 
 
-- `GET /api/books` - Get all books
-- `GET /api/books/{id}` - Get book by ID
-- `POST /api/admin/books` - Create a new book
-- `PUT /api/admin/books/{id}` - Update a book
-- `DELETE /api/admin/books/{id}` - Delete a book
+- `GET /api/books` - Get all books.
+- `GET /api/books/{id}` - Get book by ID.
+- `POST /api/admin/books` - Create a new book, Admin only.
+- `PUT /api/admin/books/{id}` - Update a book, Admin only.
+- `DELETE /api/admin/books/{id}` - Delete a book, Admin only.
 
-### Members (ADMIN only for POST/PUT/DELETE)
+### Members
 
-- `GET /api/admin/members` - Get all members - admin only
-- `GET /api/members/me` - Get member for authenticated user
+- `GET /api/admin/members` - Get all members - Admin only.
+- `GET /api/members/me` - Get member details for authenticated user.
 - Other APIs are not implemented due to time constraint.
 
 ### Loans (Member operations use authenticated user from JWT)
@@ -263,22 +257,22 @@ Below is a summary of available endpoints. For complete details, refer to Swagge
 - `POST /api/loans/return/{loanId}` - Return a book (can only return own loans)
 - `GET /api/loans/my?page&size` - Get my loans
 - `GET /api/loans/my?activeOnly=true&page&size` - Get my active loans
-- `GET /api/loans/{loanId}` - Get specific loan details (can only view own loans)
-- `GET /api/admin/loans?page&size` - Get all loans in the system (ADMIN only)
+- `GET /api/loans/{loanId}` - Get specific loan details. Member can only view own loans. Admin can view all loans.
+- `GET /api/admin/loans?page&size` - Get all loans from all users, Admin only.
 
 ## API Response Structure
 API response will contain the following field and its data type:
-1. `result` (mandatory) : `ResultEnum` - the API code representing the result.
+1. `result` (mandatory) : `ResultEnum` - Representing the result code.
 2. `pagination` (mandatory if the data is an array): `Pagination`.
-3. `data` (mandatory) : `Object` or `Array_Object` representing the server resource returned to the client to consume e.g. Book, Loan.
-4. `message` (optional) : `String` - more detail message if available.
+3. `data` (mandatory) : `Object` or `Array` representing the server resource returned to the client to consume e.g. Book, Loan.
+4. `message` (optional) : `Text` - more detail message if available.
 
 ### ResultEnum
-It is an Enum that indicates the result of the API calls whether it is successful or failed.
+It is an Enum that provides the result code of the API calls whether it is successful or failed.
 It has the following attribute:
-1. `result`: String : `S` | `F` - indicates the result, `S`=Success, `F`=Failed.
-2. `code`: String - constants for the results code, example `SUCCESS`, `BAD_CREDENTIALS`. 
-3. `description`: Text - short description of the result
+1. `result`: `String` : `S` | `F` - indicates the result, `S`=Success, `F`=Failed.
+2. `code`: `String` - constants for the results code, example `SUCCESS`, `BAD_CREDENTIALS`. 
+3. `description`: `Text` - short description of the result
 
 The following are the list of value of `ResultEnum`:
 
@@ -297,11 +291,11 @@ The following are the list of value of `ResultEnum`:
 
 
 ### Pagination
-Indicates the page of the array of objects returned by the Server:
+Indicates the page of the array of resources returned by the Server:
 1. currentPage: int - the current page of the result.
-2. pageSize: int - the number of data returned in the page.
-3. totalElements: int - the total number of objects.
-4. totalPages: int - total number of objects
+2. pageSize: int - the number of resources returned in the page.
+3. totalElements: int - the total number of resources.
+4. totalPages: int - total number of pages.
 
 
 ## API Examples
