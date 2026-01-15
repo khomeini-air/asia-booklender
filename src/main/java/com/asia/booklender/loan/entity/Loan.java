@@ -11,7 +11,14 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.time.Instant;
 
 @Entity
-@Table(name = "loans")
+@Table(name = "loans",
+        indexes = {
+                // Primary index: Find loans by member
+                @Index(name = "idx_member", columnList = "member_id"),
+
+                // Find active loans by member & find overdue loan by member
+                @Index(name = "idx_member_returnedAt_dueAt", columnList = "member_id, returned_at, due_at")
+        })
 @Data
 @SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true)
@@ -23,7 +30,7 @@ public class Loan extends BasedEntity {
     private Long id;
 
     @CreationTimestamp
-    @Column(name = "borrowed_at", nullable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
+    @Column(name = "borrowed_at", nullable = false, updatable = false, columnDefinition = "TIMESTAMP DEFAULT CURRENT_TIMESTAMP")
     private Instant borrowedAt;
 
     @Column(name = "returned_at", columnDefinition = "TIMESTAMP")
@@ -32,9 +39,15 @@ public class Loan extends BasedEntity {
     @Column(name = "due_at", nullable = false, columnDefinition = "TIMESTAMP")
     private Instant dueAt;
 
+    @Column(name = "book_id", insertable = false, updatable = false)
+    private Long bookId;  // Direct FK access
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "book_id", nullable = false)
-    private Book book;
+    private Book book;  // Full book entity when needed
+
+    @Column(name = "member_id", insertable = false, updatable = false)
+    private Long memberId;  // Direct FK access
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "member_id", nullable = false)

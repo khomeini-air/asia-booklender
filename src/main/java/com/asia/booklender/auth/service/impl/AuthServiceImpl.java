@@ -30,6 +30,8 @@ public class AuthServiceImpl implements AuthService {
     private final MemberRepository memberRepository;
     private final UserDetailsService userDetailsService;
     private final JwtUtil jwtUtil;
+
+    // Injected from the SecurityConfig
     private final AuthenticationManager authenticationManager;
 
     /**

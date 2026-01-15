@@ -34,6 +34,7 @@ public class SecurityConfig {
             RequestLoggingFilter requestLoggingFilter
     ) throws Exception {
         http
+                // CSRF is disabled since the system is stateless hence no csrf attack
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints

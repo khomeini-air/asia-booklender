@@ -40,7 +40,9 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
         String token = resolveToken(request);
 
-        // No Bearer token found - continue without authentication
+        // No Bearer token found - continue without authentication and let Spring Security decide whether the endpoint requires authentication.
+        // This filter only attempts authentication if the credentials are present.
+        // It also allows public endpoints to be accessible.
         if (token == null) {
             chain.doFilter(request, response);
             return;
@@ -81,7 +83,8 @@ public class JwtAuthFilter extends OncePerRequestFilter {
     private void authenticate(String token, HttpServletRequest request) {
         String username = jwtUtil.extractUsername(token);
 
-        // Skip authentication if username is missing or already authenticated
+        // Skip authentication if username is missing or already authenticated.
+        // Some endpoints are public and Spring Security decides access later.
         if (username == null || SecurityContextHolder.getContext().getAuthentication() != null) {
             return;
         }
@@ -96,13 +99,15 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authentication =
                 new UsernamePasswordAuthenticationToken(
                         userDetails,
-                        null,
+                        null, // password is not stored
                         userDetails.getAuthorities()
                 );
 
         authentication.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
 
-        // Store authentication in SecurityContext for downstream access
+        // Store authentication in SecurityContext for downstream access.
+        // This enables @preauthorize, hasRole, and access in services.
+        // SecurityContextHolder is request-scoped in stateless apps, hence no session is created
         SecurityContextHolder.getContext().setAuthentication(authentication);
     }
 
@@ -120,7 +125,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     /**
      * Skip JWT authentication for public endpoints.
-     *
+     * It's functionally overlaps with Security Config, but it's not a redundant since both operates on different layers
      * @param request {@link HttpServletRequest}
      */
     @Override

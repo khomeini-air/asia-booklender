@@ -6,7 +6,10 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 
 @Entity
-@Table(name = "members")
+@Table(name = "members",
+        indexes = {
+                @Index(name = "idx_email", columnList = "email", unique = true)
+        })
 @Data
 @SuperBuilder(toBuilder = true)
 @EqualsAndHashCode(callSuper = true)

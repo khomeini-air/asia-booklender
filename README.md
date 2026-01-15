@@ -21,7 +21,6 @@ A secure RESTful API for managing a book lending system with configurable borrow
 
 
 ### Out of Scope
-- Unit Tests, Integration Tests, Performance Tests, Security Tests. Implementing those tests will require huge amount of dedications that only worth, in my opinion, if the candidate got shortlisted 
 - User and Member registration, logout, password reset, and refresh token.
 - Support for multiple book loan
 - Full-Text Search for members, books and loans history.
@@ -160,12 +159,10 @@ The API will be available at `http://localhost:8080`
 
 ### Access Points
 
-After starting the application, you can access:
-
 | Endpoint                                    | Purpose | Authentication |
 |---------------------------------------------|---------|----------------|
 | http://localhost:8080/swagger-ui/index.html | Interactive API Documentation | None (public)  |
-| http://localhost:8080/api-docs              | OpenAPI Specification (JSON) | None (public)  |
+| http://localhost:8080/v3/api-docs           | OpenAPI Specification (JSON) | None (public)  |
 | http://localhost:8080/actuator/health       | Health Check | Admin only     |
 | http://localhost:8080/actuator/info         | Application Info | Admin only     |
 | http://localhost:8080/actuator/metrics      | Metrics | Admin only     |
@@ -263,8 +260,8 @@ Below is a summary of available endpoints. For complete details, refer to Swagge
 ## API Response Structure
 API response will contain the following field and its data type:
 1. `result` (mandatory) : `ResultEnum` - Representing the result code.
-2. `pagination` (mandatory if the data is an array): `Pagination`.
-3. `data` (mandatory) : `Object` or `Array` representing the server resource returned to the client to consume e.g. Book, Loan.
+2. `data` (mandatory if success) : `Object` or `Array` representing the server resource returned to the client to consume e.g. Book, Loan.
+3. `pagination` (mandatory if the data is an array): `Pagination`.
 4. `message` (optional) : `Text` - more detail message if available.
 
 ### ResultEnum
@@ -276,26 +273,26 @@ It has the following attribute:
 
 The following are the list of value of `ResultEnum`:
 
-| result                     | code | description                   | 
-|---------------------------|----------|-------------------------------|
-| `S`     | `"SUCCESS"` | Success                       | 
-| `F`     | `"BAD_CREDENTIALS"` | User is not aunthenticated/authorized | 
-| `F`    | `"PARAM_ILLEGAL"` |Bad Parameter                  | 
-| `F` | `"RESOURCE_NOT_FOUND"` | Resource Not Found            |
-| `F` | `"BOOK_NOT_AVAILABLE"` | Book not available for loan   |
-| `F` | `"MAX_LOAN_EXCEEDED"` | Maximum loans exceeded        |
-| `F` | `"LOAN_OVERDUE"` | User has loan overdue         |
-| `F` | `"ACCESS_DENIED"` | User is not authorized to access the service |
-| `F` | `"LOAN_ALREADY_RETURNED"` | The loan has been returned previously      |
-| `F` | `"INTERNAL_ERROR"` | MEMBER                        |
+| result | code | description                 | Associated HTTP Code |
+|-----|----------|-----------------------------|----------------------|
+| `S` | `"SUCCESS"` | Success                     | 2XX                  |
+| `F` | `"BAD_CREDENTIALS"` | User is not aunthenticated  | 401                  | 
+| `F` | `"PARAM_ILLEGAL"` | Bad Parameter               | 400                  |
+| `F` | `"RESOURCE_NOT_FOUND"` | Resource Not Found          | 404                  |
+| `F` | `"BOOK_NOT_AVAILABLE"` | Book not available for loan | 422                  |
+| `F` | `"MAX_LOAN_EXCEEDED"` | Maximum loans exceeded      | 422                  |
+| `F` | `"LOAN_OVERDUE"` | User has loan overdue       | 422                  |
+| `F` | `"ACCESS_DENIED"` | User is not authorized to access the service | 403                  |
+| `F` | `"LOAN_ALREADY_RETURNED"` | The loan has been returned previously | 422                  |
+| `F` | `"INTERNAL_ERROR"` | Internal Error              | 500                  |
 
 
 ### Pagination
 Indicates the page of the array of resources returned by the Server:
-1. currentPage: int - the current page of the result.
-2. pageSize: int - the number of resources returned in the page.
-3. totalElements: int - the total number of resources.
-4. totalPages: int - total number of pages.
+1. `currentPage`: `int` - the current page of the result.
+2. `pageSize`: `int` - the number of resources returned in the page.
+3. `totalElements`: `int` - the total number of resources.
+4. `totalPages`: `int` - total number of pages.
 
 
 ## API Examples
